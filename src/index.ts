@@ -87,9 +87,9 @@ const invokeCLI = async (
   };
 
 
-  const runCmd = async (fn, fnName) => {
+  const runCmd = async (fn: () => Promise<void>, fnName: string) => {
     await fn().catch(
-        (err) => {
+        (err: Error) => {
           setFailure(
               `Codecov: Failed to properly ${fnName}: ${err.message}`,
               failCi,
@@ -121,9 +121,13 @@ const downloadAndInvokeCLI = (failCi: boolean, verbose: boolean) => {
         }).on('finish', async () => {
           filePath.close();
 
-          await verify(filename, platform, uploaderVersion, verbose, failCi);
+          const verified = await verify(
+              filename, platform, uploaderVersion, verbose, failCi,
+          );
+          if (!verified) return;
+
           await versionInfo(platform, uploaderVersion);
-          await fs.chmodSync(filename, '777');
+          fs.chmodSync(filename, '755');
 
           const unlink = () => {
             fs.unlink(filename, (err) => {

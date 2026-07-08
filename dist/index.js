@@ -37457,6 +37457,7 @@ var validate_awaiter = (undefined && undefined.__awaiter) || function (thisArg, 
 
 
 const verify = (filename, platform, version, verbose, failCi) => validate_awaiter(void 0, void 0, void 0, function* () {
+    let verified = true;
     try {
         const uploaderName = getUploaderName(platform);
         // Get SHASUM and SHASUM signature files
@@ -37490,6 +37491,7 @@ const verify = (filename, platform, version, verbose, failCi) => validate_awaite
             else {
                 setFailure('Codecov: Uploader shasum does not match -- ' +
                     `uploader hash: ${hash}, public hash: ${shasum}`, failCi);
+                verified = false;
             }
         });
         const verifySignature = () => validate_awaiter(void 0, void 0, void 0, function* () {
@@ -37505,6 +37507,7 @@ const verify = (filename, platform, version, verbose, failCi) => validate_awaite
             }
             catch (err) {
                 setFailure(`Codecov: Error verifying gpg signature: ${err.message}`, failCi);
+                verified = false;
             }
         });
         const importKey = () => validate_awaiter(void 0, void 0, void 0, function* () {
@@ -37520,6 +37523,7 @@ const verify = (filename, platform, version, verbose, failCi) => validate_awaite
             }
             catch (err) {
                 setFailure(`Codecov: Error importing gpg key: ${err.message}`, failCi);
+                verified = false;
             }
         });
         yield importKey();
@@ -37528,7 +37532,9 @@ const verify = (filename, platform, version, verbose, failCi) => validate_awaite
     }
     catch (err) {
         setFailure(`Codecov: Error validating uploader: ${err.message}`, failCi);
+        verified = false;
     }
+    return verified;
 });
 /* harmony default export */ const validate = (verify);
 
@@ -45436,9 +45442,11 @@ const downloadAndInvokeCLI = (failCi, verbose) => {
             setFailure(`Codecov: Failed to write uploader binary: ${err.message}`, true);
         }).on('finish', () => src_awaiter(void 0, void 0, void 0, function* () {
             filePath.close();
-            yield validate(filename, platform, uploaderVersion, verbose, failCi);
+            const verified = yield validate(filename, platform, uploaderVersion, verbose, failCi);
+            if (!verified)
+                return;
             yield version(platform, uploaderVersion);
-            yield external_fs_.chmodSync(filename, '777');
+            external_fs_.chmodSync(filename, '755');
             const unlink = () => {
                 external_fs_.unlink(filename, (err) => {
                     if (err) {

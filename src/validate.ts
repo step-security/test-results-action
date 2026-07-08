@@ -18,7 +18,8 @@ const verify = async (
     version: string,
     verbose: boolean,
     failCi: boolean,
-): Promise<void> => {
+): Promise<boolean> => {
+  let verified = true;
   try {
     const uploaderName = getUploaderName(platform);
 
@@ -73,6 +74,7 @@ const verify = async (
               `uploader hash: ${hash}, public hash: ${shasum}`,
             failCi,
         );
+        verified = false;
       }
     };
 
@@ -92,6 +94,7 @@ const verify = async (
             `Codecov: Error verifying gpg signature: ${err.message}`,
             failCi,
         );
+        verified = false;
       }
     };
 
@@ -108,6 +111,7 @@ const verify = async (
         await spawnSync('gpg', args, {stdio: 'inherit'});
       } catch (err) {
         setFailure(`Codecov: Error importing gpg key: ${err.message}`, failCi);
+        verified = false;
       }
     };
 
@@ -116,6 +120,8 @@ const verify = async (
     await validateSha();
   } catch (err) {
     setFailure(`Codecov: Error validating uploader: ${err.message}`, failCi);
+    verified = false;
   }
+  return verified;
 };
 export default verify;
