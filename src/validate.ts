@@ -78,7 +78,7 @@ const verify = async (
       }
     };
 
-    const verifySignature = async () => {
+    const verifySignature = () => {
       const args = [
         '--logger-fd',
         '1',
@@ -87,18 +87,14 @@ const verify = async (
         path.join(__dirname, `${uploaderName}.SHA256SUM`),
       ];
 
-      try {
-        await spawnSync('gpg', args, {stdio: 'inherit'});
-      } catch (err) {
-        setFailure(
-            `Codecov: Error verifying gpg signature: ${err.message}`,
-            failCi,
-        );
+      const result = spawnSync('gpg', args, {stdio: 'inherit'});
+      if (result.status !== 0) {
+        setFailure('Codecov: GPG signature verification failed', failCi);
         verified = false;
       }
     };
 
-    const importKey = async () => {
+    const importKey = () => {
       const args = [
         '--logger-fd',
         '1',
@@ -107,16 +103,15 @@ const verify = async (
         path.join(__dirname, 'pgp_keys.asc'),
       ];
 
-      try {
-        await spawnSync('gpg', args, {stdio: 'inherit'});
-      } catch (err) {
-        setFailure(`Codecov: Error importing gpg key: ${err.message}`, failCi);
+      const result = spawnSync('gpg', args, {stdio: 'inherit'});
+      if (result.status !== 0) {
+        setFailure('Codecov: GPG key import failed', failCi);
         verified = false;
       }
     };
 
-    await importKey();
-    await verifySignature();
+    importKey();
+    verifySignature();
     await validateSha();
   } catch (err) {
     setFailure(`Codecov: Error validating uploader: ${err.message}`, failCi);

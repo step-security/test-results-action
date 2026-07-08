@@ -37494,7 +37494,7 @@ const verify = (filename, platform, version, verbose, failCi) => validate_awaite
                 verified = false;
             }
         });
-        const verifySignature = () => validate_awaiter(void 0, void 0, void 0, function* () {
+        const verifySignature = () => {
             const args = [
                 '--logger-fd',
                 '1',
@@ -37502,15 +37502,13 @@ const verify = (filename, platform, version, verbose, failCi) => validate_awaite
                 external_node_path_namespaceObject.join(__dirname, `${uploaderName}.SHA256SUM.sig`),
                 external_node_path_namespaceObject.join(__dirname, `${uploaderName}.SHA256SUM`),
             ];
-            try {
-                yield (0,external_node_child_process_namespaceObject.spawnSync)('gpg', args, { stdio: 'inherit' });
-            }
-            catch (err) {
-                setFailure(`Codecov: Error verifying gpg signature: ${err.message}`, failCi);
+            const result = (0,external_node_child_process_namespaceObject.spawnSync)('gpg', args, { stdio: 'inherit' });
+            if (result.status !== 0) {
+                setFailure('Codecov: GPG signature verification failed', failCi);
                 verified = false;
             }
-        });
-        const importKey = () => validate_awaiter(void 0, void 0, void 0, function* () {
+        };
+        const importKey = () => {
             const args = [
                 '--logger-fd',
                 '1',
@@ -37518,16 +37516,14 @@ const verify = (filename, platform, version, verbose, failCi) => validate_awaite
                 '--import',
                 external_node_path_namespaceObject.join(__dirname, 'pgp_keys.asc'),
             ];
-            try {
-                yield (0,external_node_child_process_namespaceObject.spawnSync)('gpg', args, { stdio: 'inherit' });
-            }
-            catch (err) {
-                setFailure(`Codecov: Error importing gpg key: ${err.message}`, failCi);
+            const result = (0,external_node_child_process_namespaceObject.spawnSync)('gpg', args, { stdio: 'inherit' });
+            if (result.status !== 0) {
+                setFailure('Codecov: GPG key import failed', failCi);
                 verified = false;
             }
-        });
-        yield importKey();
-        yield verifySignature();
+        };
+        importKey();
+        verifySignature();
         yield validateSha();
     }
     catch (err) {
