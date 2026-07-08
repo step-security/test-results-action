@@ -150,12 +150,8 @@ const downloadAndInvokeCLI = (failCi: boolean, verbose: boolean) => {
   await validateSubscription();
   const failCi = isTrue(core.getInput('fail_ci_if_error'));
   try {
-    core.warning(
-        `This action is being deprecated in favor of 'codecov-action'.
-      Please update CI accordingly to use 'codecov-action@v5' with
-      'report_type: test_results'.
-      The 'codecov-action' should and can be run at least once for
-      coverage and once for test results`,
+    core.info(
+        `This action has an alternative in form of 'step-security/codecov-action'.`
     );
 
     const binaryPath = core.getInput('binary');
