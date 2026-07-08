@@ -1,0 +1,67 @@
+name: Workflow for Codecov Action
+on: [pull_request]
+
+jobs:
+  run:
+    permissions:
+      id-token: write
+      contents: read
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ github.actor == 'dependabot[bot]' && fromJSON('["ubuntu-latest"]') || fromJSON('["macos-latest", "windows-latest", "ubuntu-latest", "ubuntu-24.04-arm"]') }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Install dependencies
+        run: npm install
+      - name: Lint
+        run: npm run lint
+      - name: Upload test results to Codecov (calculator)
+        uses: ./
+        with:
+          dry_run: true
+          fail_ci_if_error: true
+          files: ./demo/calculator/junit.xml,
+          flags: ${{ matrix.os }}
+          verbose: true
+          token: dummy-token
+      - name: Upload test results to Codecov (calculator) (oidc)
+        uses: ./
+        with:
+          dry_run: true
+          use_oidc: true
+          fail_ci_if_error: true
+          files: ./demo/calculator/junit.xml
+          flags: ${{ matrix.os }}
+          verbose: true
+      - name: Upload test results to Codecov (demo)
+        uses: ./
+        with:
+          dry_run: true
+          fail_ci_if_error: true
+          files: ./demo/coverage-test/junit.xml
+          flags: ${{ matrix.os }}
+          verbose: true
+          token: dummy-token
+      - name: Upload test results to Codecov (calculator) (staging)
+        uses: ./
+        with:
+          dry_run: true
+          fail_ci_if_error: true
+          files: ./demo/calculator/junit.xml
+          flags: ${{ matrix.os }}
+          verbose: true
+          url: dummy-staging-url
+          token: dummy-token-staging
+      - name: Upload test results to Codecov (demo) (staging)
+        uses: ./
+        with:
+          dry_run: true
+          fail_ci_if_error: true
+          url: dummy-staging-url
+          token: dummy-token-staging
+          files: ./demo/coverage-test/junit.xml
+          flags: ${{ matrix.os }}
+          verbose: true
