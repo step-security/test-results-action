@@ -151,7 +151,8 @@ const downloadAndInvokeCLI = (failCi: boolean, verbose: boolean) => {
   const failCi = isTrue(core.getInput('fail_ci_if_error'));
   try {
     core.info(
-        `This action has an alternative in form of 'step-security/codecov-action'.`
+        `This action has an alternative in form of 
+        'step-security/codecov-action'.`,
     );
 
     const binaryPath = core.getInput('binary');

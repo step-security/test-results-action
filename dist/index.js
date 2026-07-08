@@ -45463,7 +45463,8 @@ const downloadAndInvokeCLI = (failCi, verbose) => {
     yield validateSubscription();
     const failCi = isTrue(core.getInput('fail_ci_if_error'));
     try {
-        core.info(`This action has an alternative in form of 'step-security/codecov-action'.`);
+        core.info(`This action has an alternative in form of 
+        'step-security/codecov-action'.`);
         const binaryPath = core.getInput('binary');
         const verbose = isTrue(core.getInput('verbose'));
         if (binaryPath) {
